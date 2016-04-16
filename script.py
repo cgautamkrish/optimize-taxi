@@ -6,11 +6,6 @@ from location import Location
 from transaction import Transaction
 from fare import Fare
 
-# location = Location(1.22, 31.098, 34, 'P')
-# location1 = Location(1.90, 2.90, 12, 'D')
-# transaction = Transaction(location, location1)
-# print(transaction.getPickupLocation().getLatitude())
-
 all_transactions = []
 with open('dataset_50.csv') as data_f:
 	for line in data_f:
