@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import datetime
 from scipy.cluster.vq import kmeans2, whiten
 
 from location import Location
@@ -7,20 +8,41 @@ from transaction import Transaction
 from fare import Fare
 
 all_transactions = []
-with open('dataset_50.csv') as data_f:
+job_tuples_list = []
+total_fare_rates = 0
+fare_rate_count = 0
+headers_line = True
+with open('dataset_600.csv') as data_f:
 	for line in data_f:
+		if headers_line:
+			headers_line = False
+			continue
 		line_list = line.split(',')
 		# Intialize pickup location
-		pickup_location = Location(line_list[1], line_list[0], 0, 'P')
+		pickup_location = Location(line_list[5], line_list[4], 0, 'P')
 		# Initialize drop-ff location
-		dropoff_location = Location(line_list[3], line_list[2], 0, 'D')
+		dropoff_location = Location(line_list[7], line_list[6], 0, 'D')
 		# Intialize fare 
-		fare = Fare(line_list[6], line_list[9], line_list[10], line_list[13], line_list[14])
+		fare = Fare(line_list[10], line_list[13], line_list[14], line_list[17], line_list[18])
 		# Finally, the transaction itself
-		transaction = Transaction(pickup_location, dropoff_location, fare, line_list[4], line_list[5])
+		transaction = Transaction(pickup_location, dropoff_location, fare, line_list[8], line_list[9])
 		all_transactions.append(transaction)
+		# Find the amount earned/minute
+		pickup_time = datetime.datetime.strptime(line_list[1], '%m/%d/%Y %H:%M')
+		dropoff_time = datetime.datetime.strptime(line_list[2], '%m/%d/%Y %H:%M')
+		journey_length = (dropoff_time - pickup_time).seconds/60
+		if journey_length != 0:
+			amount_per_minute = float(line_list[11])/journey_length
+			params = (amount_per_minute, pickup_location, dropoff_location, int(line_list[9]), pickup_time)
+			job_tuples_list.append(params)
+			#print(str(pickup_time) + " - " + str(amount_per_minute))
+			total_fare_rates += amount_per_minute
+			fare_rate_count += 1
 
-print(all_transactions)
+average_fare_rate = total_fare_rates/fare_rate_count
+print(job_tuples_list)
+
+#print(all_transactions)
 
 # coordinates= np.array([[40.68075562,-73.95561981],
 # [40.69169617,-73.99147034],
